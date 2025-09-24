@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipbook Journal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      background: #fdfdfc;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .book {
+      width: 600px;
+      height: 400px;
+      perspective: 2000px;
+      position: relative;
+    }
+    .page {
+      width: 100%;
+      height: 100%;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 2rem;
+      box-sizing: border-box;
+      transform-origin: left;
+      transition: transform 1s;
+      overflow-y: auto;
+    }
+    .page h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: #444;
+    }
+    .page p {
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .btn {
+      background: none;
+      border: 1px solid #aaa;
+      padding: 6px 12px;
+      margin: 0 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="book" id="book"></div>
+    <div class="controls">
+      <button class="btn" onclick="prevPage()">← Previous</button>
+      <button class="btn" onclick="nextPage()">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    const pages = [
+      {
+        title: "Read me when you feel sad",
+        text: "Hey, don’t let the heaviness swallow you. You’re stronger than the weight you carry. Close your eyes, breathe deep, and remember—you are loved more than you know."
+      },
+      {
+        title: "Read me when you can’t sleep",
+        text: "If your mind is too loud tonight, imagine the stars whispering: rest, rest, rest. The world can wait. For now, let your heart find peace."
+      },
+      {
+        title: "Read me when you need motivation",
+        text: "You’ve come this far, and you’ll go even further. Trust your steps, even the small ones—they all matter. I believe in you, always."
+      },
+      {
+        title: "Read me when you miss me",
+        text: "I miss you too, more than words can tell. But remember, distance doesn’t weaken us—it reminds us how precious our bond is."
+      },
+      {
+        title: "Read me when you feel unappreciated",
+        text: "Look at this page and know: you are seen, you are valued, you are irreplaceable. The world is brighter because of you."
+      },
+      {
+        title: "Read me when you need a laugh",
+        text: "Knock, knock. Who’s there? It’s me—reminding you that you’re too cute to frown. Now smile, silly. 😄"
+      },
+      {
+        title: "Read me when you’re stressed",
+        text: "Pause. Inhale hope, exhale worry. You don’t have to figure it all out today. One step at a time is enough."
+      },
+      {
+        title: "Read me when you feel lost",
+        text: "Even if you don’t see the road ahead, your feet will still find the way. Trust your journey, your light is never gone."
+      },
+      {
+        title: "Read me when you’re celebrating something",
+        text: "Yay! 🎉 I’m so proud of you. Whether big or small, every win deserves to be cheered. Dance a little, laugh a lot—you earned it!"
+      },
+      {
+        title: "Read me when you just want to feel loved",
+        text: "Here’s your reminder: you are loved beyond measure. My care for you doesn’t fade, it only grows stronger with time."
+      }
+    ];
+
+    let currentPage = 0;
+    const book = document.getElementById("book");
+
+    function renderPage() {
+      book.innerHTML = "";
+      const page = document.createElement("div");
+      page.className = "page";
+      page.innerHTML = `<h2>${pages[currentPage].title}</h2><p>${pages[currentPage].text}</p>`;
+      book.appendChild(page);
+    }
+
+    function nextPage() {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        renderPage();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        renderPage();
+      }
+    }
+
+    renderPage();
+  </script>
+</body>
+  </html>
+  
