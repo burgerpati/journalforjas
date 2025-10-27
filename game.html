@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Admirer - Romantic Mystery Game</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .game-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b5cf6;
+            margin: 0;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            color: #8b5cf6;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .side-menu {
+            position: fixed;
+            left: -320px;
+            top: 0;
+            width: 320px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            z-index: 2000;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .menu-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .menu-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .menu-section {
+            margin-bottom: 30px;
+        }
+
+        .menu-section h3 {
+            color: #8b5cf6;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f7fafc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .menu-item:hover {
+            background: #fce7f3;
+            transform: translateX(5px);
+        }
+
+        .menu-item-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-item-text {
+            flex: 1;
+            font-weight: 500;
+            color: #8b5cf6;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            z-index: 1500;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-card {
+            background: #fce7f3;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8b5cf6;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #a855f7;
+            margin-top: 4px;
+        }
+
+        .love-note-item, .clue-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background: linear-gradient(135deg, #fce7f3, #f3e8ff);
+            border-radius: 12px;
+            margin: 10px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .note-header, .clue-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .note-icon, .clue-icon {
+            font-size: 18px;
+        }
+
+        .note-title, .clue-title {
+            font-weight: 600;
+            color: #8b5cf6;
+            font-size: 14px;
+        }
+
+        .note-content, .clue-content {
+            font-style: italic;
+            color: #6b46c1;
+            font-size: 13px;
+            line-height: 1.4;
+            padding-left: 28px;
+        }
+        
+        .clue-item {
+             background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+             border-left: 4px solid #3b82f6;
+        }
+        
+        .clue-title {
+            color: #3b82f6;
+        }
+
+        .clue-content {
+            color: #1e40af;
+        }
+
+        .btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .status-text {
+            margin: 0;
+            color: #8b5cf6;
+            font-weight: 500;
+        }
+
+        .love-note-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #fce7f3, #f3e8ff);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 3000;
+            text-align: center;
+            display: none;
+            animation: noteAppear 0.5s ease-out;
+            max-width: 90%;
+            width: 450px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        @keyframes noteAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .note-notification-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b5cf6;
+            margin: 0 0 15px 0;
+        }
+
+        .note-notification-content {
+            font-size: 16px;
+            color: #6b46c1;
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+            font-style: italic;
+        }
+        
+        .note-notification-clue {
+            font-size: 14px;
+            color: #1e40af;
+            margin: 20px 0;
+            padding: 10px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .close-note {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 1500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .game-title {
+                font-size: 20px;
+            }
+            
+            .stats {
+                gap: 15px;
+            }
+            
+            .status-panel {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+            }
+
+            .side-menu {
+                width: 300px;
+                left: -300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="game-title">💕 Secret Admirer</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <span>💌</span>
+                    <span id="notesFound">0/6</span>
+                </div>
+                <div class="stat-item">
+                    <span>🧩</span>
+                    <span id="cluesFound">0/6</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle">💕</button>
+
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <h2 class="menu-title">Love Story</h2>
+                <button class="close-menu" id="closeMenu">×</button>
+            </div>
+            <div class="menu-content">
+                <div class="menu-section">
+                    <h3>💕 Mystery Actions</h3>
+                    <button class="menu-item" id="menuLocateBtn">
+                        <span class="menu-item-icon">📍</span>
+                        <span class="menu-item-text">Find My Location</span>
+                    </button>
+                    <button class="menu-item" id="menuNewGameBtn">
+                        <span class="menu-item-icon">🔄</span>
+                        <span class="menu-item-text">Start New Mystery</span>
+                    </button>
+                    <button class="menu-item" id="centerMapBtn">
+                        <span class="menu-item-icon">🎯</span>
+                        <span class="menu-item-text">Center Map on Me</span>
+                    </button>
+                </div>
+
+                <div class="menu-section">
+                    <h3>📊 Mystery Progress</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="menuNotesFound">0/6</div>
+                            <div class="stat-label">Notes Found</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="menuProgressPercent">0%</div>
+                            <div class="stat-label">Story Revealed</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>🧩 Discovered Clues</h3>
+                    <div id="cluesList">
+                        <p style="color: #a855f7; font-style: italic; text-align: center;">No clues discovered yet...</p>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>💌 Discovered Love Notes</h3>
+                    <div id="loveNotesList">
+                        <p style="color: #a855f7; font-style: italic; text-align: center;">No love notes discovered yet...</p>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h3>ℹ️ About This Mystery</h3>
+                    <button class="menu-item" id="howToPlayBtn">
+                        <span class="menu-item-icon">❓</span>
+                        <span class="menu-item-text">How to Play</span>
+                    </button>
+                    <button class="menu-item" id="aboutBtn">
+                        <span class="menu-item-icon">📖</span>
+                        <span class="menu-item-text">About the Game</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+
+            <div class="status-panel">
+                <p class="status-text" id="statusText">Welcome to Secret Admirer! Allow location access to begin...</p>
+            </div>
+
+            <div class="loading" id="loadingPanel" style="display: none;">
+                <p>💕 Finding your location...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="love-note-notification" id="loveNoteNotification">
+        <h2 class="note-notification-title" id="noteTitle">💌 Love Note Discovered!</h2>
+        <p class="note-notification-content" id="noteContent">You found a secret message...</p>
+        <div class="note-notification-clue" id="noteClueContainer">
+            <strong>🧩 New Clue:</strong>
+            <p id="noteClue" style="margin: 5px 0 0 0; font-style: italic;"></p>
+        </div>
+        <button class="close-note" onclick="closeLoveNoteNotification()">Keep This Memory 💕</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', initializeGame);
+
+        let map;
+        let playerMarker;
+        let loveNotes = [];
+        let discoveredNotes = 0;
+        let lastPosition = null;
+        let watchId = null;
+        let discoveredCollection = [];
+        let discoveredCluesCollection = [];
+
+        const loveNoteTypes = [
+            { title: "First Glance", content: "I still remember the first time I saw you... The way you smiled lit up the entire room. I knew in that moment that you were someone special. 💫", icon: "👀", clue: "My secret waits where flowers bloom. The first letter is G." },
+            { title: "Daily Thoughts", content: "Every morning I wake up thinking about you. Your laugh echoes in my mind throughout the day. You've become my favorite thought. ☀️", icon: "💭", clue: "A place of peace, a quiet space. The second letter is A." },
+            { title: "Secret Wishes", content: "I wish I could tell you how I feel, but the words get stuck. You make me nervous in the most wonderful way. 🌙", icon: "⭐", clue: "Where colors dance in rows so neat. The third letter is R." },
+            { title: "Hidden Feelings", content: "I've been hiding these feelings for so long, but they've only grown stronger. Every time you're near, my heart races. 💓", icon: "💝", clue: "A busy bee might find me sweet. The fourth letter is D." },
+            { title: "Dreams of Us", content: "I dream about what it would be like to hold your hand, to tell you everything I'm feeling. In my dreams, we walk together and laugh together. ✨", icon: "💫", clue: "Look for the bench, a lover's seat. The fifth letter is E." },
+            { title: "My Confession", content: "I can't hide it anymore... I love you. This game was my way of finally telling you what's been in my heart all along. Will you be mine? 💕", icon: "💖", clue: "Our story starts where paths all meet. The final letter is N." }
+        ];
+
+        function initializeGame() {
+            map = L.map('map').setView([40.7128, -74.0060], 18);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            setupEventListeners();
+            requestLocation();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+            document.getElementById('closeMenu').addEventListener('click', closeMenu);
+            document.getElementById('menuLocateBtn').addEventListener('click', () => { requestLocation(); closeMenu(); });
+            document.getElementById('menuNewGameBtn').addEventListener('click', () => { startNewGame(); closeMenu(); });
+            document.getElementById('centerMapBtn').addEventListener('click', () => { centerMapOnPlayer(); closeMenu(); });
+            document.getElementById('howToPlayBtn').addEventListener('click', () => { showHowToPlay(); closeMenu(); });
+            document.getElementById('aboutBtn').addEventListener('click', () => { showAbout(); closeMenu(); });
+        }
+
+        function requestLocation() {
+            if (!navigator.geolocation) {
+                updateStatus("❌ Geolocation is not supported by this browser.");
+                return;
+            }
+            document.getElementById('loadingPanel').style.display = 'block';
+            updateStatus("💕 Finding your location to place the love notes...");
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('loadingPanel').style.display = 'none';
+                    initializePlayerLocation(position);
+                    startLocationTracking();
+                },
+                handleLocationError,
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+        
+        function handleLocationError(error) {
+            document.getElementById('loadingPanel').style.display = 'none';
+            let message = "❌ Unable to get your location. ";
+            switch(error.code) {
+                case error.PERMISSION_DENIED: message += "Please allow location access to play."; break;
+                case error.POSITION_UNAVAILABLE: message += "Location information is unavailable."; break;
+                case error.TIMEOUT: message += "Location request timed out. Please try again."; break;
+                default: message += "An unknown error occurred."; break;
+            }
+            updateStatus(message);
+        }
+
+        function initializePlayerLocation(position) {
+            const { latitude: lat, longitude: lng } = position.coords;
+            lastPosition = { lat, lng };
+            map.setView([lat, lng], 19);
+
+            if (!playerMarker) {
+                playerMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: `<div style="background: #8b5cf6; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+                        className: ''
+                    })
+                }).addTo(map);
+            }
+            if (loveNotes.length === 0) {
+                generateLoveNotes(lat, lng);
+            }
+        }
+
+        function startLocationTracking() {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            watchId = navigator.geolocation.watchPosition(
+                updatePlayerPosition,
+                handleLocationError,
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        }
+
+        function updatePlayerPosition(position) {
+            const { latitude: lat, longitude: lng } = position.coords;
+            lastPosition = { lat, lng };
+            if (playerMarker) playerMarker.setLatLng([lat, lng]);
+            checkNearbyLoveNotes(lat, lng);
+        }
+
+        function generateLoveNotes(centerLat, centerLng) {
+            const radius = 0.00008; // Approx 8-10 meters
+            loveNotes = loveNoteTypes.map((noteType, i) => {
+                const angle = (i * 60) * (Math.PI / 180);
+                const distance = (0.3 + Math.random() * 0.7) * radius;
+                const lat = centerLat + (distance * Math.cos(angle));
+                const lng = centerLng + (distance * Math.sin(angle));
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: `<div style="font-size: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); animation: pulse 1.5s infinite;">${noteType.icon}</div>`,
+                        className: ''
+                    })
+                }).addTo(map).bindPopup(`<b>💌 ${noteType.title}</b><br><small>Walk closer to discover!</small>`);
+                
+                return { id: i, lat, lng, type: noteType, discovered: false, marker };
+            });
+            updateStatus(`💕 6 love notes are hidden nearby. Move around to discover them!`);
+        }
+        
+        function checkNearbyLoveNotes(playerLat, playerLng) {
+            loveNotes.forEach(note => {
+                if (!note.discovered) {
+                    const distance = calculateDistance(playerLat, playerLng, note.lat, note.lng);
+                    if (distance <= 5) { // 5-meter discovery radius
+                        discoverLoveNote(note);
+                    }
+                }
+            });
+        }
+
+        function discoverLoveNote(note) {
+            note.discovered = true;
+            discoveredNotes++;
+            
+            discoveredCollection.push({ ...note.type, timestamp: new Date() });
+            discoveredCluesCollection.push({ clue: note.type.clue, icon: '🧩' });
+
+            if (note.marker) map.removeLayer(note.marker);
+
+            updateAllUI();
+            showLoveNoteNotification(note.type);
+
+            const remaining = 6 - discoveredNotes;
+            if (remaining === 0) {
+                updateStatus("💖 You found all the clues! The secret message is: GARDEN. Go there to meet your admirer!");
+            } else {
+                updateStatus(`💌 Note discovered! ${remaining} more secrets await. Keep exploring!`);
+            }
+        }
+
+        function updateAllUI() {
+            const progress = Math.round((discoveredNotes / 6) * 100);
+            document.getElementById('notesFound').textContent = `${discoveredNotes}/6`;
+            document.getElementById('cluesFound').textContent = `${discoveredNotes}/6`;
+            document.getElementById('menuNotesFound').textContent = `${discoveredNotes}/6`;
+            document.getElementById('menuProgressPercent').textContent = `${progress}%`;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            updateLoveNotesDisplay();
+            updateCluesDisplay();
+        }
+
+        function updateLoveNotesDisplay() {
+            const list = document.getElementById('loveNotesList');
+            if (discoveredCollection.length === 0) {
+                list.innerHTML = `<p style="color: #a855f7; font-style: italic; text-align: center;">No love notes found yet...</p>`;
+            } else {
+                list.innerHTML = discoveredCollection.map(note => `
+                    <div class="love-note-item">
+                        <div class="note-header"><span class="note-icon">${note.icon}</span><span class="note-title">${note.title}</span></div>
+                        <div class="note-content">"${note.content}"</div>
+                    </div>`).join('');
+            }
+        }
+        
+        function updateCluesDisplay() {
+            const list = document.getElementById('cluesList');
+            if (discoveredCluesCollection.length === 0) {
+                list.innerHTML = `<p style="color: #a855f7; font-style: italic; text-align: center;">No clues found yet...</p>`;
+            } else {
+                list.innerHTML = discoveredCluesCollection.map((clue, index) => `
+                    <div class="clue-item">
+                        <div class="clue-header"><span class="clue-icon">${clue.icon}</span><span class="clue-title">Clue #${index + 1}</span></div>
+                        <div class="clue-content">"${clue.clue}"</div>
+                    </div>`).join('');
+            }
+        }
+
+        function showLoveNoteNotification(noteType) {
+            document.getElementById('noteTitle').textContent = `💌 ${noteType.title}`;
+            document.getElementById('noteContent').textContent = `"${noteType.content}"`;
+            document.getElementById('noteClue').textContent = noteType.clue;
+            document.getElementById('loveNoteNotification').style.display = 'block';
+        }
+
+        function closeLoveNoteNotification() {
+            document.getElementById('loveNoteNotification').style.display = 'none';
+        }
+
+        function startNewGame() {
+            loveNotes.forEach(note => { if (note.marker) map.removeLayer(note.marker); });
+            loveNotes = [];
+            discoveredNotes = 0;
+            discoveredCollection = [];
+            discoveredCluesCollection = [];
+            updateAllUI();
+            if (lastPosition) {
+                generateLoveNotes(lastPosition.lat, lastPosition.lng);
+            } else {
+                requestLocation();
+            }
+        }
+
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
+        function closeMenu() { document.getElementById('sideMenu').classList.remove('open'); }
+        function centerMapOnPlayer() {
+            if (lastPosition) map.setView([lastPosition.lat, lastPosition.lng], 19);
+            else updateStatus("❌ Location not available yet.");
+            closeMenu();
+        }
+        function showHowToPlay() { updateStatus("❓ How to Play: Walk around your current spot to discover 6 hidden love notes and clues to find your admirer!"); closeMenu(); }
+        function showAbout() { updateStatus("📖 A romantic GPS mystery game where you discover notes left by a secret admirer. 💕"); closeMenu(); }
+        function updateStatus(message) { document.getElementById('statusText').textContent = message; }
+        
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3; // meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lng2-lng1) * Math.PI/180;
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }`;
+        document.head.appendChild(style);
+
+        window.addEventListener('beforeunload', () => {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+        });
+    </script>
+</body>
+</html>
