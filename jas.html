@@ -1,163 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Journal Flipbook</title>
-  <style>
-    body {
-      margin: 0;
-      background: #fff;
-      font-family: 'Georgia', serif;
-      overflow: hidden;
-    }
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A Letter for You</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="intro" id="introText">
+      i hope you read this, even if it's too late.
+    </div>
+    <button class="btn" onclick="showLetter()">Read it</button>
 
-    .book {
-      width: 90%;
-      height: 90vh;
-      margin: auto;
-      margin-top: 30px;
-      display: flex;
-      perspective: 2000px;
-    }
-
-    .page {
-      width: 50%;
-      height: 100%;
-      background: #fff;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      position: relative;
-      transform-origin: left;
-      transition: transform 1s;
-      padding: 40px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .page.flipped {
-      transform: rotateY(-180deg);
-    }
-
-    .illustration {
-      flex: 1;
-      text-align: center;
-    }
-
-    .illustration img {
-      max-width: 150px;
-      opacity: 0.85;
-    }
-
-    .text {
-      flex: 2;
-      padding-left: 30px;
-      font-size: 16px;
-      line-height: 1.7;
-    }
-
-    .text h2 {
-      font-size: 14px;
-      text-transform: lowercase;
-      letter-spacing: 2px;
-      margin-bottom: 15px;
-      color: #444;
-    }
-
-    .controls {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 20px;
-    }
-
-    button {
-      background: #222;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      font-family: inherit;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Music -->
-  <audio id="bg-music" loop>
-    <source src="your-music.mp3" type="audio/mpeg">
-  </audio>
-
-  <div class="book" id="book">
-    <!-- Page 1 -->
-    <div class="page">
-      <div class="illustration">
-        <img src="https://i.imgur.com/lXuDQxw.png" alt="river">
-      </div>
-      <div class="text">
-        <h2>entry i: her understanding</h2>
-        <p>She has always been the kind of person who listens with her whole heart,
-        never quick to judge, always choosing to see the good in others...</p>
-      </div>
+    <div class="letter" id="letterBox">
+      <p id="typedText"></p>
+      <img src="ttd.png" alt="Signature" class="signature" />
     </div>
 
-    <!-- Page 2 -->
-    <div class="page">
-      <div class="illustration">
-        <img src="https://i.imgur.com/MiZxK41.png" alt="flower">
-      </div>
-      <div class="text">
-        <h2>entry ii: her resilience</h2>
-        <p>Life has tested her more times than I can count, yet she remains—steady,
-        unyielding, and alive with hope...</p>
-      </div>
-    </div>
-
-    <!-- Add more pages (entry III & IV same style) -->
-  </div>
-
-  <!-- Controls -->
-  <div class="controls">
-    <button onclick="prevPage()">← Prev</button>
-    <button onclick="nextPage()">Next →</button>
-    <button onclick="toggleMusic()">♫ Music</button>
-  </div>
-
-  <script>
-    let current = 0;
-    const pages = document.querySelectorAll('.page');
-    const book = document.getElementById('book');
-    const music = document.getElementById('bg-music');
-
-    function showPage(n) {
-      pages.forEach((p, i) => {
-        if (i < n) p.classList.add('flipped');
-        else p.classList.remove('flipped');
-      });
-    }
-
-    function nextPage() {
-      if (current < pages.length) current++;
-      showPage(current);
-    }
-
-    function prevPage() {
-      if (current > 0) current--;
-      showPage(current);
-    }
-
-    function toggleMusic() {
-      if (music.paused) {
-        music.play();
-      } else {
-        music.pause();
-      }
-    }
-  </script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
