@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Memory Flip Game</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="app">
+
+    <div class="top-bar">
+        <div class="game-title">Memory Flip!</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-n" id="s-moves">0</div>
+                <div class="stat-l">Moves</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-n" id="s-pairs">0</div>
+                <div class="stat-l">Pairs</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-n" id="s-time">0s</div>
+                <div class="stat-l">Time</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="diff-row">
+        <span class="diff-label">Difficulty:</span>
+
+        <button class="diff-btn active" data-d="8">
+            Easy (4x4)
+        </button>
+
+        <button class="diff-btn" data-d="10">
+            Medium (5x4)
+        </button>
+
+        <button class="diff-btn" data-d="18">
+            Hard (6x6)
+        </button>
+    </div>
+
+    <div class="msg-bar" id="msg">
+        Flip two cards to find a pair!
+    </div>
+
+    <div class="grid grid-4" id="grid"></div>
+
+    <div class="action-row">
+        <button id="restart-btn" class="restart-btn">
+            Restart
+        </button>
+
+        <button class="write-btn">
+            Open My Journal
+        </button>
+    </div>
+
+    <div class="best-row" id="best-row"></div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
